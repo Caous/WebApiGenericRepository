@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using WebApiGenericRepository.Infraestructure.Database;
+using WebApiGenericRepository.Model;
+using WebApiGenericRepository.Repository.Generic;
+using WebApiGenericRepository.Repository.Interfaces;
+using WebApiGenericRepository.Repository.Services;
 
 namespace WebApiGenericRepository
 {
@@ -42,6 +47,26 @@ namespace WebApiGenericRepository
             services.AddDbContext<AppDbContext>(
                 opt => opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
                 sql => sql.MigrationsAssembly(migrationAssembly)));
+
+            services.AddIdentity<User, Role>(opt =>
+            {
+                opt.SignIn.RequireConfirmedAccount = false;
+                opt.SignIn.RequireConfirmedEmail = false;
+                opt.SignIn.RequireConfirmedPhoneNumber = false;
+                opt.Password.RequireDigit = false;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = false;
+                opt.Password.RequireLowercase = false;
+                opt.Password.RequiredLength = 4;
+            }).AddEntityFrameworkStores<AppDbContext>()
+              .AddRoleValidator<RoleValidator<Role>>()
+              .AddRoleManager<RoleManager<Role>>()
+              .AddSignInManager<SignInManager<User>>();
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IDepartamentRepository, DepartamentRepository>();
+
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
         }
 
