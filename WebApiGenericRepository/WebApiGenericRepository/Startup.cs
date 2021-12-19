@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
 using WebApiGenericRepository.Infraestructure.Database;
@@ -41,6 +42,14 @@ namespace WebApiGenericRepository
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiGenericRepository", Version = "v1" });
             });
 
+            services.AddMvc(opt => {
+
+                opt.RespectBrowserAcceptHeader = true;
+
+                opt.FormatterMappings.SetMediaTypeMappingForFormat("xml", MediaTypeHeaderValue.Parse("application/xml").ToString());
+                opt.FormatterMappings.SetMediaTypeMappingForFormat("json", MediaTypeHeaderValue.Parse("application/json").ToString());
+
+            }).AddXmlSerializerFormatters();
 
             var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
