@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,6 +14,7 @@ using WebApiGenericRepository.Repository.Interfaces;
 
 namespace WebApiGenericRepository.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -20,13 +22,16 @@ namespace WebApiGenericRepository.Controllers
         private readonly ILogger<UserController> _logger;
         private IUserRepository _personRepository;
         private readonly UserManager<User> _userManager;
-        public SignInManager<User> _signInManager;
-        public UserController(ILogger<UserController> logger, IUserRepository personRepository, UserManager<User> userManager, SignInManager<User> signInManager)
+        private readonly SignInManager<User> _signInManager;
+        private readonly IUrlHelper _urlHelper;
+
+        public UserController(ILogger<UserController> logger, IUserRepository personRepository, UserManager<User> userManager, SignInManager<User> signInManager, IUrlHelper urlHelper)
         {
             _logger = logger;
             _personRepository = personRepository;
             _userManager = userManager;
             _signInManager = signInManager;
+            _urlHelper = urlHelper;
         }
         // GET: api/<User>
         [HttpGet]
@@ -44,7 +49,16 @@ namespace WebApiGenericRepository.Controllers
                 User us = await _userManager.FindByIdAsync(id.ToString());
                 if (us != null)
                 {
-                    return Ok(us);
+
+                    UserDto usertDto = new UserDto
+                    {
+                        UserName = us.UserName,
+                        Email = us.Email,
+                        FirstName = us.FirstName,
+                        LastName = us.LastName,
+                    };
+                    CreateLinks(usertDto);
+                    return Ok(usertDto);
                 }
                 else
                 {
@@ -159,7 +173,7 @@ namespace WebApiGenericRepository.Controllers
                 User usr = await _userManager.FindByIdAsync(id.ToString());
                 if (usr == null)
                 {
-                   
+
 
                     var result = await _userManager.DeleteAsync(usr);
 
@@ -179,6 +193,13 @@ namespace WebApiGenericRepository.Controllers
             }
 
             return UnprocessableEntity("Paramenters with error");
+        }
+
+        private void CreateLinks(UserDto user)
+        {
+            user.Links.Add(new LinkDTO(_urlHelper.Link(nameof(Get), new { id = 1 }), _rel: "self", _method: "GET"));
+            user.Links.Add(new LinkDTO(_urlHelper.Link(nameof(Put), new { id = 1 }), _rel: "update-cliente", _method: "PUT"));
+            user.Links.Add(new LinkDTO(_urlHelper.Link(nameof(Delete), new { id = 1 }), _rel: "delete-cliente", _method: "DELETE"));
         }
     }
 }

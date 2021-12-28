@@ -18,6 +18,8 @@ namespace WebApiGenericRepository.Infraestructure.Mappings
             builder.Property(u => u.LastName).HasColumnType("nvarchar(100)").IsRequired();
             builder.Property(u => u.DtInclused).IsRequired();
             builder.Property(u => u.DtExclused).IsRequired(false);
+            builder.Property(u => u.DtToken).IsRequired(false);
+            builder.Property(u => u.token).HasColumnType("nvarchar(500)").IsRequired(false);
             builder.Property(u => u.IdDepartament).HasColumnName("IdDepartament");
             builder.HasOne(d => d.Departament)
              .WithMany()

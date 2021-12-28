@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebApiGenericRepository.Dto
 {
-    public class UserDto : Resource
+    public class LoginDto
     {
         public string UserName { get; set; }
         [DataType(DataType.Password)]
@@ -14,11 +14,6 @@ namespace WebApiGenericRepository.Dto
         [Compare("Password")]
         [DataType(DataType.Password)]
         public string ConfirmedPassword { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int DepartamentId { get; set; }
-
-
+        public string Token { get; set; }
     }
 }

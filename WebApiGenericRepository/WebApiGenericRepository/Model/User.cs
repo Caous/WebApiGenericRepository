@@ -19,6 +19,11 @@ namespace WebApiGenericRepository.Model
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime? DtExclused { get; set; }
+        public string token { get; set; }
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime? DtToken { get; set; }
+
 
         public Departament Departament { get; set; }
     }
