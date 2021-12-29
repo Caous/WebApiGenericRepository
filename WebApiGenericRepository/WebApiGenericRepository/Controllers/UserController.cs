@@ -33,6 +33,7 @@ namespace WebApiGenericRepository.Controllers
             _signInManager = signInManager;
             _urlHelper = urlHelper;
         }
+
         // GET: api/<User>
         [HttpGet]
         public async Task<IActionResult> Get()

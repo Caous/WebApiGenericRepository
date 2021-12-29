@@ -28,7 +28,8 @@ namespace WebApiGenericRepository.Controllers
             _departamentRepository = departamentRepository;
         }
         // GET: api/<Departament>
-        [HttpGet]
+        [AllowAnonymous]
+        [HttpGet("DepartamentEnterprise")]
         public async Task<IActionResult> Get()
         {
             return Ok(await _departamentRepository.GetAll());

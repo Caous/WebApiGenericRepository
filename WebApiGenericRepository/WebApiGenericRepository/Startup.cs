@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -9,14 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Threading.Tasks;
+using System.Text;
 using WebApiGenericRepository.Infraestructure.Database;
 using WebApiGenericRepository.Model;
 using WebApiGenericRepository.Repository.Generic;
@@ -38,7 +35,8 @@ namespace WebApiGenericRepository
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddCors(opt => opt.AddDefaultPolicy(builder => {
+            services.AddCors(opt => opt.AddDefaultPolicy(builder =>
+            {
                 builder.AllowAnyOrigin();
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
@@ -50,7 +48,8 @@ namespace WebApiGenericRepository
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiGenericRepository", Version = "v1" });
             });
 
-            services.AddMvc(opt => {
+            services.AddMvc(opt =>
+            {
 
                 opt.RespectBrowserAcceptHeader = true;
 
@@ -85,6 +84,22 @@ namespace WebApiGenericRepository
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidAudience = Configuration["TokenConfigurantion:Audience"],
+                    ValidIssuer = Configuration["TokenConfigurantion:Issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenConfigurantion:Key"]))
+                };
+
+            });
+
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>()
                 .AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>()
                 .GetUrlHelper(x.GetRequiredService<IActionContextAccessor>().ActionContext));
@@ -107,6 +122,8 @@ namespace WebApiGenericRepository
 
             app.UseCors();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -114,5 +131,7 @@ namespace WebApiGenericRepository
                 endpoints.MapControllers();
             });
         }
+
+
     }
 }
